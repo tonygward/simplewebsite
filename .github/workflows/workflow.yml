@@ -1,18 +1,21 @@
-# File: .github/workflows/workflow.yml
+name: Publish Static Web App to Azure Blob Storage
 
-on: [push]
+on:
+  push:
+    branches: [ master ]
+
 jobs:
-  build:
+  login_and_publish:
     runs-on: ubuntu-latest
-    steps: 
-    - uses: actions/checkout@v1
-    - uses: actions/setup-dotnet@v1
+
+    - name: Login to Azure
+      uses: Azure/login@v1
       with:
-        dotnet-version: '3.0.100'
-    - uses: lauchacarro/Azure-Storage-Action@master
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Publish app
+      uses: Azure/cli@v1.0.0
       with:
-        enabled-static-website: 'true'
-        folder: 'MyFolder'
-        # index-document: 'index.html'
-        # error-document: '404.html' # For Angular apps with routing enabled, this must point to the index.html file because the requested routes don't exist phyiscally and blob storage would throw a 404.
-        connection-string: ${{ secrets.CONNECTION_STRING }}
+        azcliversion: latest
+        inlineScript: |
+          az storage blob upload-batch -s $GITHUB_WORKSPACE -d \$web --account-name ${{ secrets.STORAGE_ACCOUNT_NAME }}
