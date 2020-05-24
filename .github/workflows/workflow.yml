@@ -8,6 +8,7 @@ jobs:
   login_and_publish:
     runs-on: ubuntu-latest
 
+    steps:
     - name: Login to Azure
       uses: Azure/login@v1
       with:
